@@ -1,20 +1,21 @@
 import express from "express";
 import path from "path";
 import fs from "fs";
-import { createServer as createViteServer } from "vite";
 import { GoogleGenAI, Type } from "@google/genai";
 import http from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { initializeApp } from "firebase/app";
 import { getFirestore, doc, getDoc, getDocs, setDoc, collection, deleteDoc } from "firebase/firestore";
-import firebaseConfig from "./firebase-applet-config.json";
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
+const firebaseConfig = require("./firebase-applet-config.json");
 
 // Initialize express app
 const app = express();
 const PORT = 3000;
 
 const httpServer = http.createServer(app);
-const wss = new WebSocketServer({ server: httpServer });
+let wss: WebSocketServer | null = null;
 
 interface ClientConnection {
   ws: WebSocket;
@@ -22,29 +23,33 @@ interface ClientConnection {
 }
 const connectedClients = new Set<ClientConnection>();
 
-wss.on("connection", (ws) => {
-  const connection: ClientConnection = { ws };
-  connectedClients.add(connection);
-  console.log("New WebSocket advertiser connected.");
+if (!process.env.VERCEL) {
+  wss = new WebSocketServer({ server: httpServer });
 
-  ws.on("message", (message) => {
-    try {
-      const data = JSON.parse(message.toString());
-      if (data.type === "subscribe" && data.advertiserId) {
-        connection.advertiserId = data.advertiserId;
-        console.log(`WebSocket client subscribed to advertiser: ${data.advertiserId}`);
-        ws.send(JSON.stringify({ type: "subscribed", advertiserId: data.advertiserId }));
+  wss.on("connection", (ws) => {
+    const connection: ClientConnection = { ws };
+    connectedClients.add(connection);
+    console.log("New WebSocket advertiser connected.");
+
+    ws.on("message", (message) => {
+      try {
+        const data = JSON.parse(message.toString());
+        if (data.type === "subscribe" && data.advertiserId) {
+          connection.advertiserId = data.advertiserId;
+          console.log(`WebSocket client subscribed to advertiser: ${data.advertiserId}`);
+          ws.send(JSON.stringify({ type: "subscribed", advertiserId: data.advertiserId }));
+        }
+      } catch (err) {
+        console.error("Error parsing WebSocket message:", err);
       }
-    } catch (err) {
-      console.error("Error parsing WebSocket message:", err);
-    }
-  });
+    });
 
-  ws.on("close", () => {
-    connectedClients.delete(connection);
-    console.log("WebSocket client disconnected.");
+    ws.on("close", () => {
+      connectedClients.delete(connection);
+      console.log("WebSocket client disconnected.");
+    });
   });
-});
+}
 
 const broadcastCampaignStatusChange = (campaignId: string, title: string, advertiserId: string, oldStatus: string, newStatus: string, rejectReason?: string) => {
   connectedClients.forEach(client => {
@@ -1201,6 +1206,7 @@ app.get("/api/admin/analytics", async (req, res) => {
 
 async function serveApp() {
   if (process.env.NODE_ENV !== "production") {
+    const { createServer: createViteServer } = await import("vite");
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa"
