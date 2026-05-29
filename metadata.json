@@ -1,0 +1,8 @@
+{
+  "name": "Remix: Ad Campaign \u0026 Management Portal",
+  "description": "An enterprise-grade advertisement campaign management platform featuring live budget analytics, simulated checkout payments, ad scheduling, and Gemini-powered optimization suggestions.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

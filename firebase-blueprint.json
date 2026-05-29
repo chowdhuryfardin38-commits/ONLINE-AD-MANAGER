@@ -1,0 +1,113 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Represents an auth profile for an advertiser or admin user.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "email": { "type": "string" },
+        "name": { "type": "string" },
+        "role": { "type": "string", "enum": ["advertiser", "admin"] },
+        "status": { "type": "string", "enum": ["active", "inactive"] },
+        "companyName": { "type": "string" },
+        "phone": { "type": "string" },
+        "password": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "email", "name", "role", "password"]
+    },
+    "Campaign": {
+      "title": "Campaign",
+      "description": "An advertisement campaign created by an advertiser.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "advertiserId": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "budgetType": { "type": "string", "enum": ["daily", "total"] },
+        "budgetAmount": { "type": "number" },
+        "spendingAmount": { "type": "number" },
+        "startDate": { "type": "string" },
+        "endDate": { "type": "string" },
+        "status": { "type": "string", "enum": ["draft", "pending", "active", "rejected"] },
+        "createdAt": { "type": "string" },
+        "keywords": { "type": "array" },
+        "rejectReason": { "type": "string" }
+      },
+      "required": ["id", "advertiserId", "title", "budgetType", "budgetAmount", "status"]
+    },
+    "Payment": {
+      "title": "Payment",
+      "description": "A payment transaction history record for campaigns.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "campaignId": { "type": "string" },
+        "campaignTitle": { "type": "string" },
+        "advertiserId": { "type": "string" },
+        "advertiserName": { "type": "string" },
+        "amount": { "type": "number" },
+        "paymentMethod": { "type": "string" },
+        "cardBrand": { "type": "string" },
+        "last4": { "type": "string" },
+        "status": { "type": "string" },
+        "transactionDate": { "type": "string" }
+      },
+      "required": ["id", "campaignId", "advertiserId", "amount", "status"]
+    },
+    "Complaint": {
+      "title": "Complaint",
+      "description": "User submit ticket questions / complains.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "userEmail": { "type": "string" },
+        "subject": { "type": "string" },
+        "message": { "type": "string" },
+        "reply": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "resolved"] },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "userId", "subject", "message", "status"]
+    },
+    "PlatformSettings": {
+      "title": "PlatformSettings",
+      "description": "Global ad campaign rules and options.",
+      "type": "object",
+      "properties": {
+        "adRules": { "type": "string" },
+        "pricingCpc": { "type": "number" },
+        "optimizationLevel": { "type": "string" },
+        "minDailyBudget": { "type": "number" }
+      },
+      "required": ["adRules", "pricingCpc", "minDailyBudget"]
+    }
+  },
+  "firestore": {
+    "users": {
+      "schema": "User",
+      "description": "Collection of all authorized platform profiles"
+    },
+    "campaigns": {
+      "schema": "Campaign",
+      "description": "Collection of all advertiser campaigns"
+    },
+    "payments": {
+      "schema": "Payment",
+      "description": "Collection of funding and bill settlement records"
+    },
+    "complaints": {
+      "schema": "Complaint",
+      "description": "Collection of support queries and resolution letters"
+    },
+    "settings": {
+      "schema": "PlatformSettings",
+      "description": "Platform configurations and tuning state"
+    }
+  }
+}
