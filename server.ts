@@ -6,9 +6,7 @@ import http from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { initializeApp } from "firebase/app";
 import { getFirestore, doc, getDoc, getDocs, setDoc, collection, deleteDoc } from "firebase/firestore";
-import { createRequire } from "module";
-const require = createRequire(import.meta.url);
-const firebaseConfig = require("./firebase-applet-config.json");
+import firebaseConfig from "./firebase-applet-config.json";
 
 // Initialize express app
 const app = express();
